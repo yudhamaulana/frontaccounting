@@ -25,7 +25,7 @@
 
 		$upper = $this->row - 2 * $this->lineHeight;
 		$lower = $this->bottomMargin + 8 * $this->lineHeight;
-		$iline1 = $upper - 7.5 * $this->lineHeight;
+		$iline1 = $upper - 6.5 * $this->lineHeight;
 		$iline2 = $iline1 - 8 * $this->lineHeight;
 		$iline3 = $iline2 - 1.5 * $this->lineHeight;
 		$iline4 = $iline3 - 1.5 * $this->lineHeight;
@@ -35,14 +35,15 @@
 		$right = $this->pageWidth - $this->rightMargin;
 		$width = ($right - $this->leftMargin) / 5;
 		$icol = $this->pageWidth / 2;
-		$ccol = $this->cols[0] + 4;
+		$ccol = $this->cols[0] - 4; // + 4;
 		$c2col = $ccol + 60;
 		$ccol2 = $icol / 2;
 		$mcol = $icol + 8;
 		$mcol2 = $this->pageWidth - $ccol2;
 		$cols = count($this->cols);
-		$this->SetDrawColor(205, 205, 205);
-		$this->Line($iline1, 3);
+// This makes the light gray thicker line
+// 		$this->SetDrawColor(205, 205, 205);
+// 		$this->Line($iline1, 3);
 		$this->SetDrawColor(128, 128, 128);
 		$this->Line($iline1);
 		$this->rectangle($this->leftMargin, $iline2, $right - $this->leftMargin, $iline2 - $iline3, "F", null, array(222, 231, 236));   
@@ -69,7 +70,8 @@
 		$logo = company_path() . "/images/" . $this->company['coy_logo'];
 		if ($this->company['coy_logo'] != '' && file_exists($logo))
 		{
-			$this->AddImage($logo, $ccol, $this->row, 0, 40);
+// 			$this->AddImage($logo, $ccol, $this->row, 0, 20);
+			$this->AddImage($logo, $this->leftMargin - 5, $this->row, 0, 20);
 		}
 		else
 		{
@@ -92,22 +94,22 @@
 
 		// Company data
 		$this->TextWrapLines($ccol, $icol, $this->company['postal_address']);
-		$this->Font('italic');
+// 		$this->Font('italic');
 		if (@$this->company['phone'])
 		{
-			$this->Text($ccol, _("Phone"), $c2col);
+			$this->Text($ccol, _("Phone:"), $c2col);
 			$this->Text($c2col, $this->company['phone'], $mcol);
 			$this->NewLine();
 		}
 		if (@$this->company['fax'])
 		{
-			$this->Text($ccol, _("Fax"), $c2col);
+			$this->Text($ccol, _("Fax:"), $c2col);
 			$this->Text($c2col, $this->company['fax'], $mcol);
 			$this->NewLine();
 		}
 		if (@$this->company['email'])
 		{
-			$this->Text($ccol, _("Email"), $c2col);
+			$this->Text($ccol, _("Email:"), $c2col);
 
 			$url = "mailto:" . $this->company['email'];
 			$this->SetTextColor(0, 0, 255);
@@ -119,7 +121,7 @@
 		}
 		if (@$this->company['gst_no'])
 		{
-			$this->Text($ccol, _("Our VAT No."), $c2col);
+			$this->Text($ccol, _("GST No."), $c2col);
 			$this->Text($c2col, $this->company['gst_no'], $mcol);
 			$this->NewLine();
 		}
@@ -142,10 +144,13 @@
 		if ($this->pageNumber > 1)
 			$this->Text($this->endLine - 35, _("Page") . ' ' . $this->pageNumber);
 		$this->row = $iline1 - $this->lineHeight;
-		$this->fontSize -= 4;
+// 		$this->fontSize -= 4;
 		$this->Text($ccol, $Addr1['title'], $icol);
-		$this->Text($mcol, $Addr2['title']);
-		$this->fontSize += 4;
+		$showDeliveryAddress = false;
+		if ($showDeliveryAddress) {
+			$this->Text($mcol, $Addr2['title']);
+		}
+// 		$this->fontSize += 4;
 
 // address1
 		$temp = $this->row = $this->row - $this->lineHeight - 5;
@@ -154,11 +159,12 @@
 		$this->TextWrapLines($ccol, $icol - $ccol, $Addr1['address']);
 
 // address2
-		$this->row = $temp;
-		$this->Text($mcol, $Addr2['name']);
-		$this->NewLine();
-		$this->TextWrapLines($mcol, $this->rightMargin - $mcol, $Addr2['address']);
-
+		if ($showDeliveryAddress) {
+			$this->row = $temp;
+			$this->Text($mcol, $Addr2['name']);
+			$this->NewLine();
+			$this->TextWrapLines($mcol, $this->rightMargin - $mcol, $Addr2['address']);
+		}
 		// Auxiliary document information
 		$col = $this->leftMargin;
 		foreach($aux_info as $info_header => $info_content)
