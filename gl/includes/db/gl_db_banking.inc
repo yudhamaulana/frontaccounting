@@ -190,6 +190,22 @@ function add_exchange_variation_all($date=null, $ref="", $memo)
 //	$to_account   -	target bank account id
 //	
 
+function update_bank_transfer(
+	$trans_no, $from_account, $to_account, $date_,
+	$amount, $ref, $memo_, $charge=0, $target_amount=0)
+{
+	begin_transaction();
+	delete_comments(ST_BANKTRANSFER, $trans_no);
+	void_bank_trans(ST_BANKTRANSFER, $trans_no, true);
+	void_gl_trans(ST_BANKTRANSFER, $trans_no, true);
+	$new_trans_no = add_bank_transfer(
+		$from_account, $to_account, $date_, $amount,
+		$ref, $memo_, $charge, $target_amount
+	);
+	commit_transaction();
+	return $new_trans_no;
+}
+
 function add_bank_transfer($from_account, $to_account, $date_,
 	$amount, $ref, $memo_, $charge=0, $target_amount=0)
 {
