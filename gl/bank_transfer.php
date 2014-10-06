@@ -83,9 +83,16 @@ function gl_payment_controls($trans_no)
 			}
 			$_POST['DatePaid'] = sql2date($to_trans['trans_date']);
 			$_POST['ref'] = $to_trans['ref'];
-			$_POST['memo_'] = get_comments_string($type, $id);
+			$_POST['memo_'] = get_comments_string($to_trans['type'], $trans_no);
+			$_POST['FromBankAccount'] = $from_trans['bank_act'];
+			$_POST['ToBankAccount'] = $to_trans['bank_act'];
+			$_POST['amount'] = $to_trans['amount'];
 		} else {
 			$_POST['ref'] = $Refs->get_next(ST_BANKTRANSFER);
+			$_POST['memo_'] = '';
+			$_POST['FromBankAccount'] = 0;
+			$_POST['ToBankAccount'] = 0;
+			$_POST['amount'] = 0;
 		}
 	}
 	$home_currency = get_company_currency();
@@ -96,13 +103,13 @@ function gl_payment_controls($trans_no)
 
 	table_section(1);
 
-	bank_accounts_list_row(_("From Account:"), 'FromBankAccount', $from_trans['bank_act'], true);
+	bank_accounts_list_row(_("From Account:"), 'FromBankAccount', $_POST['FromBankAccount'], true);
 
 //	if (! $trans_no) {
 		bank_balance_row($_POST['FromBankAccount']);
 	//}
 
-	bank_accounts_list_row(_("To Account:"), 'ToBankAccount', $to_trans['bank_act'], true);
+	bank_accounts_list_row(_("To Account:"), 'ToBankAccount', $_POST['ToBankAccount'], true);
 
 	if (!isset($_POST['DatePaid'])) { // init page
 		$_POST['DatePaid'] = new_doc_date();
@@ -123,11 +130,11 @@ function gl_payment_controls($trans_no)
 
 		amount_row(_("Incoming Amount:"), 'target_amount', null, '', $to_currency, 2);
 	} else {
-		amount_row(_("Amount:"), 'amount', $to_trans['amount']);
+		amount_row(_("Amount:"), 'amount', $_POST['amount']);
 		amount_row(_("Bank Charge:"), 'charge');
 	}
 
-    textarea_row(_("Memo:"), 'memo_', null, 40,4);
+    textarea_row(_("Memo:"), 'memo_', $_POST['memo_'], 40,4);
 
 	end_outer_table(1); // outer table
 
@@ -264,6 +271,7 @@ if (isset($_POST['submit'])) {
 	}
 }
 
+$trans_no = '';
 if (!$trans_no && isset($_POST['_trans_no'])) {
 	$trans_no = $_POST['_trans_no'];
 }
