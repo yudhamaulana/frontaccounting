@@ -189,12 +189,11 @@ function check_valid_entries()
 		set_focus('amount');
 		return false;
 	}
-	if ($trans = check_bank_account_history(-$amnt_tr, $_POST['FromBankAccount'], $_POST['DatePaid'])) {
-
+	if ($trans = check_bank_account_history(-$amnt_tr, $_POST['FromBankAccount'], '1/1/2099' /*$_POST['DatePaid']*/)) {
 		display_error(sprintf(_("The bank transaction would result in exceed of authorized overdraft limit for transaction: %s #%s on %s."),
 			$systypes_array[$trans['type']], $trans['trans_no'], sql2date($trans['trans_date'])));
 		set_focus('amount');
-		$input_error = 1;
+		return false;
 	}
 
 	if (isset($_POST['charge']) && !check_num('charge', 0))
@@ -246,7 +245,7 @@ function check_valid_entries()
 	if (!db_has_currency_rates(get_bank_account_currency($_POST['ToBankAccount']), $_POST['DatePaid']))
 		return false;
 
-    return true;
+	return true;
 }
 
 //----------------------------------------------------------------------------------------
