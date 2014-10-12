@@ -164,10 +164,14 @@ function void_bank_trans($type, $type_no, $nested=false)
 }
 
 /**
-*	Check account history to find transaction which would exceed authorized overdraft for given account.
-*	Returns null or transaction in conflict. Running balance is checked on daily basis only, to enable ID change after edition.
-*	$delta_amount - tested change in bank balance at $date.
-**/
+ *	Check account history to find transaction which would exceed authorized overdraft for given account.
+ *	Returns null or transaction in conflict. Running balance is checked on daily basis only, to enable ID change after edition.
+ * @param double $delta_amount tested change in bank balance at $date
+ * @param int $bank_account
+ * @param string $date
+ * @param string $user
+ * @return NULL|multitype:number string |multitype:
+ */
 function check_bank_account_history($delta_amount, $bank_account, $date=null, $user=null)
 {
 	if ($delta_amount >= 0 && isset($date))

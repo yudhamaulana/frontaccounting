@@ -150,7 +150,7 @@ function gl_payment_controls($trans_no)
 
 //----------------------------------------------------------------------------------------
 
-function check_valid_entries()
+function check_valid_entries($trans_no)
 {
 	global $Refs;
 
@@ -189,8 +189,18 @@ function check_valid_entries()
 		set_focus('amount');
 		return false;
 	}
-	if ($trans = check_bank_account_history(-$amnt_tr, $_POST['FromBankAccount'], '1/1/2099' /*$_POST['DatePaid']*/)) {
-		display_error(sprintf(_("The bank transaction would result in exceed of authorized overdraft limit for transaction: %s #%s on %s."),
+	if ($trans_no) {
+		if (null != ($problemTransaction = check_bank_transfer(
+			$trans_no, $_POST['FromBankAccount'], $_POST['ToBankAccount'], $_POST['DatePaid'], -$amnt_tr
+		))) {
+			display_error(sprintf(_("The bank transfer would result in exceed of authorized overdraft limit for transaction: %s #%s on %s."),
+			$systypes_array[$trans['type']], $problemTransaction['trans_no'], sql2date($problemTransaction['trans_date'])));
+			set_focus('amount');
+			return false;
+		}
+	}
+	if ($trans = check_bank_account_history(-$amnt_tr, $_POST['FromBankAccount'], $_POST['DatePaid'])) {
+		display_error(sprintf(_("The bank transfer would result in exceed of authorized overdraft limit for transaction: %s #%s on %s."),
 			$systypes_array[$trans['type']], $trans['trans_no'], sql2date($trans['trans_date'])));
 		set_focus('amount');
 		return false;
@@ -255,7 +265,7 @@ function bank_transfer_handle_submit()
 	if ($trans_no) {
 		$trans_no = update_bank_transfer($trans_no, $_POST['FromBankAccount'], $_POST['ToBankAccount'], $_POST['DatePaid'], input_num('amount'), $_POST['ref'], $_POST['memo_'], input_num('charge'), input_num('target_amount'));
 	} else {
-	new_doc_date($_POST['DatePaid']);
+		new_doc_date($_POST['DatePaid']);
 		$trans_no = add_bank_transfer($_POST['FromBankAccount'], $_POST['ToBankAccount'], $_POST['DatePaid'], input_num('amount'), $_POST['ref'], $_POST['memo_'], input_num('charge'), input_num('target_amount'));
 	}
 
@@ -264,12 +274,6 @@ function bank_transfer_handle_submit()
 
 //----------------------------------------------------------------------------------------
 
-if (isset($_POST['submit'])) {
-	if (check_valid_entries() == true) {
-		bank_transfer_handle_submit();
-	}
-}
-
 $trans_no = '';
 if (!$trans_no && isset($_POST['_trans_no'])) {
 	$trans_no = $_POST['_trans_no'];
@@ -277,6 +281,13 @@ if (!$trans_no && isset($_POST['_trans_no'])) {
 if (!$trans_no && isset($_GET['trans_no'])) {
 	$trans_no = $_GET["trans_no"];
 }
+
+if (isset($_POST['submit'])) {
+    if (check_valid_entries($trans_no) == true) {
+        bank_transfer_handle_submit();
+    }
+}
+
 gl_payment_controls($trans_no);
 
 end_page();
