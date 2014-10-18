@@ -224,7 +224,7 @@ function check_valid_entries($trans_no)
 		return false;
 	}
 
-	if (! $_POST['_trans_no'] && ! is_new_reference($_POST['ref'], ST_BANKTRANSFER)) {
+	if (! $trans_no && ! is_new_reference($_POST['ref'], ST_BANKTRANSFER)) {
 		display_error(_("The entered reference is already in use."));
 		set_focus('ref');
 		return false;
@@ -261,7 +261,7 @@ function check_valid_entries($trans_no)
 //----------------------------------------------------------------------------------------
 function bank_transfer_handle_submit()
 {
-	$trans_no = $_POST['_trans_no'];
+	$trans_no = array_key_exists('_trans_no', $_POST) ?  $_POST['_trans_no'] : null;
 	if ($trans_no) {
 		$trans_no = update_bank_transfer($trans_no, $_POST['FromBankAccount'], $_POST['ToBankAccount'], $_POST['DatePaid'], input_num('amount'), $_POST['ref'], $_POST['memo_'], input_num('charge'), input_num('target_amount'));
 	} else {
