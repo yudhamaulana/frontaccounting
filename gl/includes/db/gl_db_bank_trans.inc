@@ -102,7 +102,7 @@ function get_bank_trans_for_bank_account($bank_account, $from, $to)
 		AND ISNULL(v.date_)
 		AND trans_date >= '$from'
 		AND trans_date <= '$to'
-		AND amount > 0
+		AND amount != 0
 		ORDER BY trans_date, t.id";
 
 	return db_query($sql,"The transactions for '" . $bank_account . "' could not be retrieved");
